@@ -1,6 +1,7 @@
 """Track recently played models."""
 from pydantic import BaseModel
 from .song import Track
+from typing import List, Dict
 
 class TrackRecentlyPlayed(BaseModel):
     """Tracks recently from User."""
@@ -8,6 +9,4 @@ class TrackRecentlyPlayed(BaseModel):
     item: Track
     played_at: str
     type: str
-    external_url: str
-    captured_type: str
-    captured_timestamp: str
+    external_url: List[Dict[str, str]]

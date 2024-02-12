@@ -34,6 +34,6 @@ class Track(BaseModel):
     external_urls: List[Dict[str, str]]
     album: Album
     disc_number: int
-    duration: int
+    duration_ms: int
     explicit: bool
     artists: List[Artist]
