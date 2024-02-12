@@ -1,4 +1,7 @@
-class Image():
+"""image models."""
+from pydantic import BaseModel
+
+class Image(BaseModel):
     """Image of a user."""
 
     url: str

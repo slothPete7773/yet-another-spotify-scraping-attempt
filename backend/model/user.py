@@ -1,9 +1,9 @@
 """user models."""
-
+from pydantic import BaseModel
 from typing import List
-from image import Image
+from .image import Image
 
-class User():
+class User(BaseModel):
     """Current user."""
 
     display_name: str

@@ -1,8 +1,8 @@
 """Track recently played models."""
+from pydantic import BaseModel
+from .song import Track
 
-from song import Track
-
-class TrackRecentlyPlayed:
+class TrackRecentlyPlayed(BaseModel):
     """Tracks recently from User."""
 
     item: Track
