@@ -73,47 +73,62 @@ class Authenticator():
     def get_client_key_base64(self) -> str: 
         return base64.b64encode(f"{self.__client_id}:{self.__client_secret}".encode()).decode()
 
-    
-    def get_access_token(self, code: str = None) -> str: 
+    def get_access_token(self) -> str: 
         is_authorize: str = self.config.get("token_info", "authorize?")
-        prev_scope = set(self.config.get("token_info", "scope").split(" "))
-        curr_scope = set(self.scope.split(" "))
+        # prev_scope = set(self.config.get("token_info", "scope").split(" "))
+        # curr_scope = set(self.scope.split(" "))
 
-        if ((is_authorize.lower() == "true") and (curr_scope == prev_scope)):
-            print("already true, give access_token")
-            return self.config.get("token_info", "access_token")
+        if (is_authorize.lower() == "true"):
+            # print("already true, give access_token")
+            return {
+                "state": 0,
+                "access_token": self.config.get("token_info", "access_token")
+            }
+        else:
+             return {
+                "state": 1,
+                "access_token": None
+             }
         
-        CLIENT_KEY_B64: str = self.get_client_key_base64() # base64.b64encode(f"{self.client_id}:{self.client_secret}".encode()).decode()
-        headers: dict = {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "Authorization": "Basic {}".format(CLIENT_KEY_B64)
-        }
-        payload: dict = {
-            "grant_type": "authorization_code",
-            "code": code,
-            "redirect_uri": self.redirect_uri,
-        }
+    # def get_access_token(self, code: str = None) -> str: 
+    #     is_authorize: str = self.config.get("token_info", "authorize?")
+    #     prev_scope = set(self.config.get("token_info", "scope").split(" "))
+    #     curr_scope = set(self.scope.split(" "))
+
+    #     if ((is_authorize.lower() == "true") and (curr_scope == prev_scope)):
+    #         print("already true, give access_token")
+    #         return self.config.get("token_info", "access_token")
         
-        OAUTH_ACCESS_TOKEN_URL: str = self.OAUTH_ACCESS_TOKEN_URL
-        r = requests.post(OAUTH_ACCESS_TOKEN_URL, headers=headers, data=payload)
-        token_info = r.json()
-        print(f"Token Info: \n{token_info}")
+    #     CLIENT_KEY_B64: str = self.get_client_key_base64() # base64.b64encode(f"{self.client_id}:{self.client_secret}".encode()).decode()
+    #     headers: dict = {
+    #         "Content-Type": "application/x-www-form-urlencoded",
+    #         "Authorization": "Basic {}".format(CLIENT_KEY_B64)
+    #     }
+    #     payload: dict = {
+    #         "grant_type": "authorization_code",
+    #         "code": code,
+    #         "redirect_uri": self.redirect_uri,
+    #     }
+        
+    #     OAUTH_ACCESS_TOKEN_URL: str = self.OAUTH_ACCESS_TOKEN_URL
+    #     r = requests.post(OAUTH_ACCESS_TOKEN_URL, headers=headers, data=payload)
+    #     token_info = r.json()
+    #     print(f"Token Info: \n{token_info}")
 
         
-        token_info_dict = {
-            "access_token": token_info["access_token"],
-            "token_type": token_info["token_type"],
-            "expires_in": str(token_info["expires_in"]),
-            "scope": token_info["scope"],
-            "expires_at": str((datetime.datetime.now() + datetime.timedelta(seconds=token_info["expires_in"])).timestamp()),
-            "refresh_token": token_info["refresh_token"],
-            "authorize?": "true",
-        }
-        write_config(self.config_file, "token_info", token_info_dict, self.config)
-        return token_info["access_token"]
+    #     token_info_dict = {
+    #         "access_token": token_info["access_token"],
+    #         "token_type": token_info["token_type"],
+    #         "expires_in": str(token_info["expires_in"]),
+    #         "scope": token_info["scope"],
+    #         "expires_at": str((datetime.datetime.now() + datetime.timedelta(seconds=token_info["expires_in"])).timestamp()),
+    #         "refresh_token": token_info["refresh_token"],
+    #         "authorize?": "true",
+    #     }
+    #     write_config(self.config_file, "token_info", token_info_dict, self.config)
+    #     return token_info["access_token"]
 
     def refresh_access_token(self) -> dict:
-        print("Hello")
         is_authorize: str = self.config.get("token_info", "authorize?")
         if (is_authorize.lower() == "false"):
             raise PermissionError
@@ -130,18 +145,19 @@ class Authenticator():
         r = requests.post(self.OAUTH_ACCESS_TOKEN_URL, headers=headers, data=payload)
         token_info = r.json()
 
-        print(f"Time now: {datetime.datetime.now()}")
+        # print(f"Time now: {datetime.datetime.now()}")
         new_expire_dt = datetime.datetime.now() + datetime.timedelta(seconds=token_info['expires_in'])
         new_expire_stamp = new_expire_dt.timestamp()
-        print(f"new expire date: {new_expire_dt}")
-        print(f"new expire : {new_expire_stamp}")
-        print(f"recovered expire : {datetime.datetime.fromtimestamp(new_expire_stamp)}")
+        # print(f"new expire date: {new_expire_dt}")
+        # print(f"new expire : {new_expire_stamp}")
+        # print(f"recovered expire : {datetime.datetime.fromtimestamp(new_expire_stamp)}")
         
         data = {
             "expires_at": str(new_expire_stamp),
             "access_token": token_info["access_token"],
         }
         write_config(self.config_file, "token_info", data, self.config)
+        token_info['expires_at'] = new_expire_stamp
         return {
              "token_info": token_info,
              "state": 0

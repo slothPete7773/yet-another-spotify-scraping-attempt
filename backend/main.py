@@ -19,7 +19,7 @@ async def _authorization(code: str=None):
     # try:
     if code is not None:
         config = ConfigParser()
-        config_filepath = "backend/utils/env.conf"
+        config_filepath = "env.conf"
         token_info_dict = {
                 "code": code
             }
