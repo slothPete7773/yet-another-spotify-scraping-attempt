@@ -6,7 +6,7 @@ from typing import List, Dict
 class TrackRecentlyPlayed(BaseModel):
     """Tracks recently from User."""
 
-    item: Track
+    track: Track
     played_at: str
     type: str
     external_url: List[Dict[str, str]]

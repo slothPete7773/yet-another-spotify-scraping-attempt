@@ -1,32 +1,12 @@
-# from pathlib import Path
-import time
-from urllib.parse import urlparse, urlencode
-from typing import Dict, Type, Optional
-from dataclasses import dataclass
+from urllib.parse import urlencode
 import base64
 import datetime
 import requests
+from typing import Dict
 
-# import spotipy
-# from spotipy import Spotify
-# from spotipy.oauth2 import SpotifyOAuth
-# from spotipy.exceptions import 
-
-
-# import configparser
 from configparser import ConfigParser
 config = ConfigParser()
 
-# from pydantic import BaseModel
-
-class UnixMilliSecond:
-    def __init__(self) -> None:
-        self.__timestamp: int = None
-
-    def get_current_Unix_milliseconds_timestamp(self) -> int:
-        now_ms = int( time.time_ns() / 1000 )
-
-        print( now_ms )
 
 def write_config(config_filepath: str, section_name: str, config_info: Dict, config_parser: ConfigParser): 
             for key in config_info.keys():
@@ -75,11 +55,8 @@ class Authenticator():
 
     def get_access_token(self) -> str: 
         is_authorize: str = self.config.get("token_info", "authorize?")
-        # prev_scope = set(self.config.get("token_info", "scope").split(" "))
-        # curr_scope = set(self.scope.split(" "))
 
         if (is_authorize.lower() == "true"):
-            # print("already true, give access_token")
             return {
                 "state": 0,
                 "access_token": self.config.get("token_info", "access_token")
@@ -90,43 +67,6 @@ class Authenticator():
                 "access_token": None
              }
         
-    # def get_access_token(self, code: str = None) -> str: 
-    #     is_authorize: str = self.config.get("token_info", "authorize?")
-    #     prev_scope = set(self.config.get("token_info", "scope").split(" "))
-    #     curr_scope = set(self.scope.split(" "))
-
-    #     if ((is_authorize.lower() == "true") and (curr_scope == prev_scope)):
-    #         print("already true, give access_token")
-    #         return self.config.get("token_info", "access_token")
-        
-    #     CLIENT_KEY_B64: str = self.get_client_key_base64() # base64.b64encode(f"{self.client_id}:{self.client_secret}".encode()).decode()
-    #     headers: dict = {
-    #         "Content-Type": "application/x-www-form-urlencoded",
-    #         "Authorization": "Basic {}".format(CLIENT_KEY_B64)
-    #     }
-    #     payload: dict = {
-    #         "grant_type": "authorization_code",
-    #         "code": code,
-    #         "redirect_uri": self.redirect_uri,
-    #     }
-        
-    #     OAUTH_ACCESS_TOKEN_URL: str = self.OAUTH_ACCESS_TOKEN_URL
-    #     r = requests.post(OAUTH_ACCESS_TOKEN_URL, headers=headers, data=payload)
-    #     token_info = r.json()
-    #     print(f"Token Info: \n{token_info}")
-
-        
-    #     token_info_dict = {
-    #         "access_token": token_info["access_token"],
-    #         "token_type": token_info["token_type"],
-    #         "expires_in": str(token_info["expires_in"]),
-    #         "scope": token_info["scope"],
-    #         "expires_at": str((datetime.datetime.now() + datetime.timedelta(seconds=token_info["expires_in"])).timestamp()),
-    #         "refresh_token": token_info["refresh_token"],
-    #         "authorize?": "true",
-    #     }
-    #     write_config(self.config_file, "token_info", token_info_dict, self.config)
-    #     return token_info["access_token"]
 
     def refresh_access_token(self) -> dict:
         is_authorize: str = self.config.get("token_info", "authorize?")
@@ -145,12 +85,8 @@ class Authenticator():
         r = requests.post(self.OAUTH_ACCESS_TOKEN_URL, headers=headers, data=payload)
         token_info = r.json()
 
-        # print(f"Time now: {datetime.datetime.now()}")
         new_expire_dt = datetime.datetime.now() + datetime.timedelta(seconds=token_info['expires_in'])
         new_expire_stamp = new_expire_dt.timestamp()
-        # print(f"new expire date: {new_expire_dt}")
-        # print(f"new expire : {new_expire_stamp}")
-        # print(f"recovered expire : {datetime.datetime.fromtimestamp(new_expire_stamp)}")
         
         data = {
             "expires_at": str(new_expire_stamp),
