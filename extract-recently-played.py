@@ -1,75 +1,78 @@
 import json
-from model.track_recently_played import TrackRecentlyPlayed
-from model.song import Track, Album, Artist
+
+# from model.track_recently_played import TrackRecentlyPlayed
+from model.models import Track, Album, Artist, TrackRecord
 from typing import List
 
 filename = "temp_result.json"
 
 # TODO: iterate through all items
-with open(filename, 'r') as file:
+with open(filename, "r") as file:
     content = json.load(file)
     # print(type(content))
     # print(json.dumps(content, indent=2))
-    content = content['items']
-    content_item = content[0]
-    
+    record_activities: list = content["items"]
+    # content_item = content[0]
+
     recently_played = list()
 
-    for content_item in content:
-        content_track = content_item['track']
-        
-        content_album = content_track['album']
-        album: Album = Album(
-            id=content_album['id'],
-            external_urls=list(map(lambda name, url: {name: url}, content_album['external_urls'].keys(), content_album['external_urls'].values())),
-            href=content_album['href'],
-            name=content_album['name'],
-            release_date=content_album['release_date'],
-            total_tracks=content_album['total_tracks'],
-            images=content_album['images'],
-        )
-        # print(album.model_dump_json(indent=2))
-        
-        content_artists = content_track['artists']
-        artists: List[Artist] = [Artist(
-            id=artist['id'],
-            external_urls=list(map(lambda name, url: {name: url}, artist['external_urls'].keys(), artist['external_urls'].values())),
-            href=artist['href'],
-            name=artist['name'],
-        ) for artist in content_track['artists']]
-        # print(artists)
-        
+    count = 0
+    MAX_ITER = 3
+    for record in record_activities:
+        if count >= MAX_ITER:
+            exit()
+        count = count + 1
 
+        track: dict = record["track"]
+
+        album: dict = track["album"]
+        # print(album.keys())
+        _album = Album.from_dict(album)
+
+        artists: list[dict] = track["artists"]
+        _artists = [Artist.from_dict(artist) for artist in artists]
+        print(_artists)
+        # print(artists)
+
+        # TODO: To continue change implementation.
         track: Track = Track(
-            id=content_track['id'],
-            href=content_track['href'],
-            name=content_track['name'],
-            popularity=content_track['popularity'],
-            preview_url=content_track['preview_url'],
-            track_number=content_track['track_number'],
-            external_urls=map(lambda name, url: {name: url}, content_track['external_urls'].keys(), content_track['external_urls'].values()),
+            id=track["id"],
+            href=track["href"],
+            name=track["name"],
+            popularity=track["popularity"],
+            preview_url=track["preview_url"],
+            track_number=track["track_number"],
+            external_urls=map(
+                lambda name, url: {name: url},
+                track["external_urls"].keys(),
+                track["external_urls"].values(),
+            ),
             # list(map(lambda name, url: {name: url}, dic['external_urls'].keys(), dic['external_urls'].values()))
             album=album,
-            disc_number=content_track['disc_number'],
-            duration_ms=content_track['duration_ms'],
-            explicit=content_track['explicit'],
+            disc_number=track["disc_number"],
+            duration_ms=track["duration_ms"],
+            explicit=track["explicit"],
             artists=artists,
         )
         # print(track.model_dump_json(indent=2))
 
-
         recently_played.append(
-            TrackRecentlyPlayed(
+            TrackRecord(
                 track=track,
-                played_at=content_item["played_at"],
-                type=content_item["context"]["type"],
-                external_url=list(map(lambda name, url: {name: url}, content_item["context"]['external_urls'].keys(), content_item["context"]['external_urls'].values())),
+                played_at=record["played_at"],
+                type=record["context"]["type"],
+                external_url=list(
+                    map(
+                        lambda name, url: {name: url},
+                        record["context"]["external_urls"].keys(),
+                        record["context"]["external_urls"].values(),
+                    )
+                ),
             ).model_dump()
         )
 
         # result = recently_played.model_dump_json(indent=2)
         # print(type(result))
     # result = recently_played.model_dump()
-    with open("result_result.json", 'w') as file:
-        json.dump(recently_played, file, indent=2)     
-        
+    with open("result_result.json", "w") as file:
+        json.dump(recently_played, file, indent=2)

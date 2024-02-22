@@ -1,15 +1,15 @@
 """Track models."""
 # from pydantic import Base
 from typing import List, Dict
-from .image import Image
-from .base import Base
-from sqlalchemy.orm import DeclarativeBase, Mapped, relationship, mapped_column
-from sqlalchemy import ForeignKey
 from datetime import datetime
 
-# from datetime import Date
+from .base import Base
+from dataclasses import dataclass
+from dataclasses_json import dataclass_json
 
 
+@dataclass_json
+@dataclass
 class TrackRecord(Base):
     """Tracks recently from User."""
 
@@ -20,30 +20,42 @@ class TrackRecord(Base):
     external_url: List[Dict[str, str]]
 
 
+@dataclass_json
+@dataclass
 class Album(Base):
     """Song album"""
 
     __tablename__ = "album"
 
     id: str
-    external_urls: List[Dict[str, str]]
+    external_urls: Dict[str, str]
     href: str
     name: str
     release_date: str
     total_tracks: int
 
+    def __init__(self, **data):
+        super().__init__(**data)
 
+
+@dataclass_json
+@dataclass
 class Artist(Base):
     """Song Artist."""
 
     __tablename__ = "artist"
 
     id: str
-    external_urls: List[Dict[str, str]]
+    external_urls: Dict[str, str]
     href: str
     name: str
 
+    def __init__(self, **data):
+        super().__init__(**data)
 
+
+@dataclass_json
+@dataclass
 class Track(Base):
     """Song track from the Spotify."""
 
@@ -55,7 +67,7 @@ class Track(Base):
     popularity: int
     preview_url: str
     track_number: int
-    external_urls: List[Dict[str, str]]
+    external_urls: Dict[str, str]
     # album: Album
     disc_number: int
     duration_ms: int
@@ -64,6 +76,8 @@ class Track(Base):
     createdAt: datetime
 
 
+@dataclass_json
+@dataclass
 class TrackFeature(Base):
     """Artists featured in a track."""
 
@@ -75,6 +89,8 @@ class TrackFeature(Base):
     createdAt: datetime
 
 
+@dataclass_json
+@dataclass
 class AlbumTrack(Base):
     """A track in the album."""
 
@@ -86,6 +102,8 @@ class AlbumTrack(Base):
     createdAt: datetime
 
 
+@dataclass_json
+@dataclass
 class Image(Base):
     """Image of a user."""
 
@@ -95,9 +113,11 @@ class Image(Base):
     url: str
     height: int
     width: int
-    ownerId: str
+    ownerId: str = None
 
 
+@dataclass_json
+@dataclass
 class User(Base):
     """Current user."""
 
