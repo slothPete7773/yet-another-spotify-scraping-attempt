@@ -1,3 +1,9 @@
 .DS_Store
 env.conf
+
+# Depedencies and caches
 **/__pycache__/
+/PGDATA/
+
+# Experiment
+/__experiment__
