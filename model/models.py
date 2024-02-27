@@ -3,9 +3,10 @@
 from typing import List, Dict, Optional
 from datetime import datetime
 
-from .base import Base
+from model.base import Base
 from dataclasses import dataclass
 from dataclasses_json import dataclass_json
+import uuid
 
 
 @dataclass_json
@@ -13,11 +14,11 @@ from dataclasses_json import dataclass_json
 class TrackRecord:
     """Tracks recently from User."""
 
-    id: str
     track_id: str  # Referential
     played_at: float
     type: Optional[str] = None
     external_url: Optional[Dict[str, str]] = None
+    id: str = uuid.uuid4().__str__()
 
 
 @dataclass_json
@@ -82,41 +83,41 @@ class Track:
 
 @dataclass_json
 @dataclass
-class TrackFeature(Base):
+class TrackFeature:
     """Artists featured in a track."""
 
     __tablename__ = "track_feature"
 
-    id: str
     track_id: str
     artist_id: str
-    createdAt: float
+    id: str = uuid.uuid4().__str__()
+    createdAt: float = datetime.now().timestamp()
 
 
 @dataclass_json
 @dataclass
-class AlbumTrack(Base):
+class AlbumTrack:
     """A track in the album."""
 
     __tablename__ = "album_track"
 
-    id: str
     track_id: str
     album_id: str
-    createdAt: float
+    id: str = uuid.uuid4().__str__()
+    createdAt: float = datetime.now().timestamp()
 
 
 @dataclass_json
 @dataclass
-class Image(Base):
+class Image:
     """Image of a user."""
 
     __tablename__ = "image"
 
-    id: str
     url: str
     height: int
     width: int
+    id: str = uuid.uuid4().__str__()
     ownerId: str = None
 
 

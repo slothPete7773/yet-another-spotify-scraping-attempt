@@ -1,7 +1,15 @@
 import json
 
 # from model.track_recently_played import TrackRecentlyPlayed
-from model.models import Track, Album, Artist, TrackRecord
+from model.models import (
+    Track,
+    Album,
+    Artist,
+    TrackRecord,
+    TrackFeature,
+    AlbumTrack,
+    Image,
+)
 from typing import List
 import uuid
 from datetime import datetime
@@ -30,14 +38,26 @@ with open(filename, "r") as file:
         album: dict = track["album"]
         # print(album.keys())
         _album = Album.from_dict(album)
-
+        _album_images = [
+            Image.from_dict(
+                {
+                    "id": uuid.uuid4().__str__(),
+                    "url": image["url"],
+                    "height": image["height"],
+                    "width": image["width"],
+                    "ownerId": _album.id,
+                }
+            )
+            for image in album["images"]
+        ]
+        # print(_album_images)
         artists: list[dict] = track["artists"]
         _artists = [Artist.from_dict(artist) for artist in artists]
         # print(_artists)
 
         _track = Track.from_dict(track)
+        # print(_track)
 
-        # print(record)
         _temp = {
             "id": uuid.uuid4().__str__(),
             "track_id": _track.id,
@@ -54,3 +74,23 @@ with open(filename, "r") as file:
 
         _track_record = TrackRecord.from_dict(_temp)
         # print(_track_record)
+
+        track_feats = []
+        for _each_artist in _artists:
+            _track_feat = TrackFeature.from_dict(
+                {
+                    "id": uuid.uuid4().__str__(),
+                    "track_id": _track.id,
+                    "artist_id": _each_artist.id,
+                }
+            )
+            track_feats.append(_track_feat)
+
+        _album_track = AlbumTrack.from_dict(
+            {
+                "id": uuid.uuid4().__str__(),
+                "track_id": _track.id,
+                "album_id": _album.id,
+            }
+        )
+        # print(_album_track)
