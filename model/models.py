@@ -1,6 +1,6 @@
 """Track models."""
 # from pydantic import Base
-from typing import List, Dict
+from typing import List, Dict, Optional
 from datetime import datetime
 
 from .base import Base
@@ -10,14 +10,14 @@ from dataclasses_json import dataclass_json
 
 @dataclass_json
 @dataclass
-class TrackRecord(Base):
+class TrackRecord:
     """Tracks recently from User."""
 
     id: str
     track_id: str  # Referential
-    played_at: datetime
-    type: str
-    external_url: List[Dict[str, str]]
+    played_at: float
+    type: Optional[str] = None
+    external_url: Optional[Dict[str, str]] = None
 
 
 @dataclass_json
@@ -56,7 +56,7 @@ class Artist(Base):
 
 @dataclass_json
 @dataclass
-class Track(Base):
+class Track:
     """Song track from the Spotify."""
 
     __tablename__ = "track"
@@ -73,7 +73,11 @@ class Track(Base):
     duration_ms: int
     explicit: bool
     # artists: List[Artist]
-    createdAt: datetime
+    # createdAt: Optional[float] = datetime.now().timestamp
+    createdAt: float = datetime.now().timestamp()
+
+    # def __init__(self, **data):
+    #     super().__init__(**data)
 
 
 @dataclass_json
@@ -86,7 +90,7 @@ class TrackFeature(Base):
     id: str
     track_id: str
     artist_id: str
-    createdAt: datetime
+    createdAt: float
 
 
 @dataclass_json
@@ -99,7 +103,7 @@ class AlbumTrack(Base):
     id: str
     track_id: str
     album_id: str
-    createdAt: datetime
+    createdAt: float
 
 
 @dataclass_json

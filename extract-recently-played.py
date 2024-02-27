@@ -3,6 +3,8 @@ import json
 # from model.track_recently_played import TrackRecentlyPlayed
 from model.models import Track, Album, Artist, TrackRecord
 from typing import List
+import uuid
+from datetime import datetime
 
 filename = "temp_result.json"
 
@@ -31,48 +33,24 @@ with open(filename, "r") as file:
 
         artists: list[dict] = track["artists"]
         _artists = [Artist.from_dict(artist) for artist in artists]
-        print(_artists)
-        # print(artists)
+        # print(_artists)
 
-        # TODO: To continue change implementation.
-        track: Track = Track(
-            id=track["id"],
-            href=track["href"],
-            name=track["name"],
-            popularity=track["popularity"],
-            preview_url=track["preview_url"],
-            track_number=track["track_number"],
-            external_urls=map(
-                lambda name, url: {name: url},
-                track["external_urls"].keys(),
-                track["external_urls"].values(),
-            ),
-            # list(map(lambda name, url: {name: url}, dic['external_urls'].keys(), dic['external_urls'].values()))
-            album=album,
-            disc_number=track["disc_number"],
-            duration_ms=track["duration_ms"],
-            explicit=track["explicit"],
-            artists=artists,
-        )
-        # print(track.model_dump_json(indent=2))
+        _track = Track.from_dict(track)
 
-        recently_played.append(
-            TrackRecord(
-                track=track,
-                played_at=record["played_at"],
-                type=record["context"]["type"],
-                external_url=list(
-                    map(
-                        lambda name, url: {name: url},
-                        record["context"]["external_urls"].keys(),
-                        record["context"]["external_urls"].values(),
-                    )
-                ),
-            ).model_dump()
-        )
+        # print(record)
+        _temp = {
+            "id": uuid.uuid4().__str__(),
+            "track_id": _track.id,
+            "played_at": datetime.strptime(
+                record["played_at"].split(".")[0], "%Y-%m-%dT%H:%M:%S"
+            ).timestamp(),
+            "type": record["context"]["type"]
+            if record["context"] is not None
+            else None,
+            "external_url": record["context"]["external_urls"]
+            if record["context"] is not None
+            else None,
+        }
 
-        # result = recently_played.model_dump_json(indent=2)
-        # print(type(result))
-    # result = recently_played.model_dump()
-    with open("result_result.json", "w") as file:
-        json.dump(recently_played, file, indent=2)
+        _track_record = TrackRecord.from_dict(_temp)
+        # print(_track_record)
