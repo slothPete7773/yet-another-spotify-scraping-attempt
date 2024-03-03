@@ -8,35 +8,63 @@ from dataclasses import dataclass
 from dataclasses_json import dataclass_json
 import uuid
 
-
-@dataclass_json
-@dataclass
-class TrackRecord:
-    """Tracks recently from User."""
-
-    track_id: str  # Referential
-    played_at: float
-    type: Optional[str] = None
-    external_url: Optional[Dict[str, str]] = None
-    id: str = uuid.uuid4().__str__()
+from sqlalchemy.orm import Mapped, relationship, mapped_column
+from sqlalchemy import ForeignKey
+from sqlalchemy.sql import func
 
 
 @dataclass_json
 @dataclass
 class Album(Base):
-    """Song album"""
+    """Song album."""
 
     __tablename__ = "album"
 
-    id: str
-    external_urls: Dict[str, str]
-    href: str
-    name: str
-    release_date: str
-    total_tracks: int
+    id: Mapped[str] = mapped_column(primary_key=True)
+    href: Mapped[str]
+    name: Mapped[str]
+    release_date: Mapped[str]
+    total_tracks: Mapped[int]
+    external_urls: Mapped[List["AlbumExternalUrl"]] = relationship(
+        back_populates="album"
+    )
+    included_tracks: Mapped[List["Track"]] = relationship(back_populates="album")
+
+    image: Mapped["AlbumImage"] = relationship(back_populates="album")
+    createdAt: Mapped[datetime] = mapped_column(server_default=func.now())
 
     def __init__(self, **data):
         super().__init__(**data)
+
+
+@dataclass_json
+@dataclass
+class AlbumImage(Base):
+    """Cover image of an album."""
+
+    __tablename__ = "album_image"
+
+    url: Mapped[str]
+    width: Mapped[int]
+    height: Mapped[int]
+    id: Mapped[str] = mapped_column(primary_key=True, default=uuid.uuid4().__str__())
+    album_id: Mapped[str] = mapped_column(ForeignKey("album.id"))
+    album: Mapped["Album"] = relationship(back_populates="image")
+
+
+@dataclass_json
+@dataclass
+class AlbumExternalUrl(Base):
+    """External url for an album."""
+
+    __tablename__ = "album_external_url"
+
+    url: Mapped[str]
+    source: Mapped[str]
+    id: Mapped[str] = mapped_column(primary_key=True, default=uuid.uuid4().__str__())
+    album: Mapped["Album"] = relationship(back_populates="external_urls")
+    album_id: Mapped[str] = mapped_column(ForeignKey("album.id"))
+    createdAt: Mapped[datetime] = mapped_column(server_default=func.now())
 
 
 @dataclass_json
@@ -46,79 +74,105 @@ class Artist(Base):
 
     __tablename__ = "artist"
 
-    id: str
-    external_urls: Dict[str, str]
-    href: str
-    name: str
-
-    def __init__(self, **data):
-        super().__init__(**data)
+    id: Mapped[str] = mapped_column(primary_key=True)
+    href: Mapped[str]
+    name: Mapped[str]
+    external_urls: Mapped[List["ArtistExternalUrl"]] = relationship(
+        back_populates="artist"
+    )
+    featured: Mapped[List["TrackFeature"]] = relationship(back_populates="artist")
+    createdAt: Mapped[datetime] = mapped_column(server_default=func.now())
 
 
 @dataclass_json
 @dataclass
-class Track:
+class ArtistExternalUrl(Base):
+    """External url for an album."""
+
+    __tablename__ = "artist_external_url"
+
+    url: Mapped[str]
+    source: Mapped[str]
+    id: Mapped[str] = mapped_column(primary_key=True, default=uuid.uuid4().__str__())
+    artist: Mapped["Artist"] = relationship(back_populates="external_urls")
+    artist_id: Mapped[str] = mapped_column(ForeignKey("artist.id"))
+    createdAt: Mapped[datetime] = mapped_column(server_default=func.now())
+
+
+@dataclass_json
+@dataclass
+class Track(Base):
     """Song track from the Spotify."""
 
     __tablename__ = "track"
 
-    id: str
-    href: str
-    name: str
-    popularity: int
-    preview_url: str
-    track_number: int
-    external_urls: Dict[str, str]
-    # album: Album
-    disc_number: int
-    duration_ms: int
-    explicit: bool
-    # artists: List[Artist]
-    # createdAt: Optional[float] = datetime.now().timestamp
-    createdAt: float = datetime.now().timestamp()
+    href: Mapped[str]
+    name: Mapped[str]
+    popularity: Mapped[int]
+    preview_url: Mapped[str]
+    disc_number: Mapped[int]
+    duration_ms: Mapped[int]
+    track_number: Mapped[int]
+    id: Mapped[str] = mapped_column(primary_key=True)
+    explicit: Mapped[bool] = mapped_column(default=False)
+    album_id: Mapped[str] = mapped_column(ForeignKey("album.id"))
+    album: Mapped["Album"] = relationship(back_populates="included_tracks")
+    external_urls: Mapped[List["TrackExternalUrl"]] = relationship(
+        back_populates="track"
+    )
+    featured: Mapped[List["TrackFeature"]] = relationship(back_populates="track")
+    createdAt: Mapped[datetime] = mapped_column(server_default=func.now())
 
-    # def __init__(self, **data):
-    #     super().__init__(**data)
+    def __repr__(self):
+        return f"<Track(id='{self.id}', name='{self.name}')>"
 
 
 @dataclass_json
 @dataclass
-class TrackFeature:
+class TrackExternalUrl(Base):
+    """External url for an album."""
+
+    __tablename__ = "track_external_url"
+
+    url: Mapped[str]
+    source: Mapped[str]
+    id: Mapped[str] = mapped_column(primary_key=True, default=uuid.uuid4().__str__())
+    track: Mapped["Track"] = relationship(back_populates="external_urls")
+    track_id: Mapped[str] = mapped_column(ForeignKey("track.id"))
+    createdAt: Mapped[datetime] = mapped_column(server_default=func.now())
+
+
+@dataclass_json
+@dataclass
+class TrackFeature(Base):
     """Artists featured in a track."""
 
     __tablename__ = "track_feature"
 
-    track_id: str
-    artist_id: str
-    id: str = uuid.uuid4().__str__()
-    createdAt: float = datetime.now().timestamp()
+    id: Mapped[str] = mapped_column(primary_key=True, default=uuid.uuid4().__str__())
+    track_id: Mapped[str] = mapped_column(ForeignKey("track.id"))
+    track: Mapped["Track"] = relationship(back_populates="featured")
+    artist_id: Mapped[str] = mapped_column(ForeignKey("artist.id"))
+    artist: Mapped["Artist"] = relationship(back_populates="featured")
+    createdAt: Mapped[datetime] = mapped_column(server_default=func.now())
 
 
 @dataclass_json
 @dataclass
-class AlbumTrack:
-    """A track in the album."""
+class TrackRecord(Base):
+    """Tracks recently from User."""
 
-    __tablename__ = "album_track"
+    __tablename__ = "track_record"
 
-    track_id: str
-    album_id: str
-    id: str = uuid.uuid4().__str__()
-    createdAt: float = datetime.now().timestamp()
+    track_id: Mapped[str] = mapped_column(ForeignKey("track.id"))  # Referential
+    track: Mapped["Track"] = relationship()
+    played_at: Mapped[float]
+    id: Mapped[str] = mapped_column(primary_key=True, default=uuid.uuid4().__str__())
+    type: Mapped[Optional[str]] = None
+    createdAt: Mapped[datetime] = mapped_column(server_default=func.now())
 
-
-@dataclass_json
-@dataclass
-class Image:
-    """Image of a user."""
-
-    __tablename__ = "image"
-
-    url: str
-    height: int
-    width: int
-    id: str = uuid.uuid4().__str__()
-    ownerId: str = None
+    def __repr__(self):
+        return f"<TrackRecord(id='{self.id}', track_id='{self.track_id}', track='{self.track}', played_at='{self.played_at}', type='{self.type}')>"
 
 
 @dataclass_json
@@ -128,13 +182,10 @@ class User(Base):
 
     __tablename__ = "user"
 
-    id: str
-    display_name: str
-    user_id: str
-    total_follower: int
-    country: str
-    account_tier: str
-    email: str
-    # image_id: Optional[List
-
-    # images: List[Image] = relationship()
+    email: Mapped[str]
+    user_id: Mapped[str]
+    total_follower: Mapped[int]
+    country: Mapped[str]
+    account_tier: Mapped[str]
+    display_name: Mapped[str]
+    id: Mapped[str] = mapped_column(primary_key=True, default=uuid.uuid4().__str__())
