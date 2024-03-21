@@ -7,3 +7,6 @@ env.conf
 
 # Experiment
 /__experiment__
+/landing/*.json
+
+**/.venv
