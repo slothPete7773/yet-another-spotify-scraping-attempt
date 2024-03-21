@@ -28,5 +28,6 @@ if __name__ == "__main__":
     )
     response = requests.get(API_URL, headers=headers, timeout=10).json()
 
-    with open("temp_result.json", "w") as tempfile:
+    file_name = f"{int(datetime.now().timestamp())}_spotify_recent_50.json"
+    with open(file_name, "w") as tempfile:
         json.dump(response, indent=2, fp=tempfile)
