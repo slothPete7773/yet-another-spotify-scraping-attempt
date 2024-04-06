@@ -1,7 +1,6 @@
 from sqlalchemy import create_engine
 
-# from model import Base
-from models.models import Base
+from models.models_orm import Base
 
 db_url = "postgresql://postgres:example@localhost:8032/postgres"
 engine = create_engine(db_url, echo=True)

@@ -1,18 +1,16 @@
 """Track models."""
 
-# from pydantic import Base
 from typing import List, Dict, Optional
+
 from datetime import datetime
 from dataclasses import dataclass
 
-# from model.base import Base
-# from dataclasses import dataclass
-# from dataclasses_json import dataclass_json
 import uuid
 
 from sqlalchemy.orm import Mapped, relationship, mapped_column, DeclarativeBase
 from sqlalchemy import ForeignKey
 from sqlalchemy.sql import func
+from sqlalchemy.types import DateTime
 
 
 class Base(DeclarativeBase):
@@ -30,12 +28,10 @@ class AlbumORM(Base):
     release_date: Mapped[str]
     total_tracks: Mapped[int]
     # artists: Mapped[List["Artist"]] = relationship(back_populates="album")
-    external_urls: Mapped[List["AlbumExternalUrl"]] = relationship(
+    external_urls: Mapped[List["AlbumExternalUrlORM"]] = relationship(
         back_populates="album"
     )
-    included_tracks: Mapped[List["Track"]] = relationship(back_populates="album")
-    featured: Mapped[List["AlbumFeaturedArtist"]] = relationship(back_populates="album")
-    image: Mapped["AlbumImage"] = relationship(back_populates="album")
+    image: Mapped["AlbumImageORM"] = relationship(back_populates="album")
     createdAt: Mapped[datetime] = mapped_column(server_default=func.now())
 
     def __init__(self, **data):
@@ -50,11 +46,11 @@ class AlbumImageORM(Base):
     url: Mapped[str]
     width: Mapped[int]
     height: Mapped[int]
-    id: Mapped[str] = mapped_column(primary_key=True, default=uuid.uuid4().__str__())
+    id: Mapped[str] = mapped_column(primary_key=True, default=uuid.uuid4)
     album_id: Mapped[str] = mapped_column(
         ForeignKey("album.id", ondelete="CASCADE", onupdate="CASCADE")
     )
-    album: Mapped["Album"] = relationship(back_populates="image")
+    album: Mapped["AlbumORM"] = relationship(back_populates="image")
 
 
 class AlbumExternalUrlORM(Base):
@@ -64,8 +60,8 @@ class AlbumExternalUrlORM(Base):
 
     url: Mapped[str]
     source: Mapped[str]
-    id: Mapped[str] = mapped_column(primary_key=True, default=uuid.uuid4().__str__())
-    album: Mapped["Album"] = relationship(back_populates="external_urls")
+    id: Mapped[str] = mapped_column(primary_key=True, default=uuid.uuid4)
+    album: Mapped["AlbumORM"] = relationship(back_populates="external_urls")
     album_id: Mapped[str] = mapped_column(
         ForeignKey("album.id", ondelete="CASCADE", onupdate="CASCADE")
     )
@@ -80,14 +76,10 @@ class ArtistORM(Base):
     id: Mapped[str] = mapped_column(primary_key=True)
     href: Mapped[str]
     name: Mapped[str]
-    external_urls: Mapped[List["ArtistExternalUrl"]] = relationship(
+    external_urls: Mapped[List["ArtistExternalUrlORM"]] = relationship(
         back_populates="artist"
     )
-    # album: Mapped[List["Album"]] = relationship(back_populates="artist")
-    featured: Mapped[List["TrackFeature"]] = relationship(back_populates="artist")
-    album_featured: Mapped[List["AlbumFeaturedArtist"]] = relationship(
-        back_populates="artist"
-    )
+    featured: Mapped[List["TrackFeatureORM"]] = relationship(back_populates="artist")
     createdAt: Mapped[datetime] = mapped_column(server_default=func.now())
 
 
@@ -98,32 +90,14 @@ class ArtistExternalUrlORM(Base):
 
     url: Mapped[str]
     source: Mapped[str]
-    id: Mapped[str] = mapped_column(primary_key=True, default=uuid.uuid4().__str__())
-    artist: Mapped["Artist"] = relationship(back_populates="external_urls")
+    id: Mapped[str] = mapped_column(primary_key=True, default=uuid.uuid4)
+    artist: Mapped["ArtistORM"] = relationship(back_populates="external_urls")
     artist_id: Mapped[str] = mapped_column(
         ForeignKey("artist.id", ondelete="CASCADE", onupdate="CASCADE")
     )
     createdAt: Mapped[datetime] = mapped_column(server_default=func.now())
 
 
-class AlbumFeaturedArtistORM(Base):
-    """The Artists featured in corresponding Album."""
-
-    __tablename__ = "album_featured_artist"
-
-    id: Mapped[str] = mapped_column(primary_key=True, default=uuid.uuid4().__str__())
-    album_id: Mapped[str] = mapped_column(
-        ForeignKey("album.id", ondelete="CASCADE", onupdate="CASCADE")
-    )
-    album: Mapped["Album"] = relationship(back_populates="featured")
-    artist_id: Mapped[str] = mapped_column(
-        ForeignKey("artist.id", ondelete="CASCADE", onupdate="CASCADE")
-    )
-    artist: Mapped["Artist"] = relationship(back_populates="album_featured")
-    createdAt: Mapped[datetime] = mapped_column(server_default=func.now())
-
-
-# @dataclass
 class TrackORM(Base):
     """Song track from the Spotify."""
 
@@ -141,11 +115,10 @@ class TrackORM(Base):
     album_id: Mapped[str] = mapped_column(
         ForeignKey("album.id", ondelete="CASCADE", onupdate="CASCADE"),
     )
-    album: Mapped[Optional["Album"]] = relationship(back_populates="included_tracks")
-    external_urls: Mapped[List["TrackExternalUrl"]] = relationship(
+    external_urls: Mapped[List["TrackExternalUrlORM"]] = relationship(
         back_populates="track"
     )
-    featured: Mapped[List["TrackFeature"]] = relationship(back_populates="track")
+    featured: Mapped[List["TrackFeatureORM"]] = relationship(back_populates="track")
     createdAt: Mapped[datetime] = mapped_column(server_default=func.now())
 
     def __repr__(self):
@@ -159,12 +132,15 @@ class TrackExternalUrlORM(Base):
 
     url: Mapped[str]
     source: Mapped[str]
-    id: Mapped[str] = mapped_column(primary_key=True, default=uuid.uuid4().__str__())
-    track: Mapped["Track"] = relationship(back_populates="external_urls")
+    id: Mapped[str] = mapped_column(primary_key=True, default=uuid.uuid4)
+    track: Mapped["TrackORM"] = relationship(back_populates="external_urls")
     track_id: Mapped[str] = mapped_column(
         ForeignKey("track.id", ondelete="CASCADE", onupdate="CASCADE")
     )
     createdAt: Mapped[datetime] = mapped_column(server_default=func.now())
+
+    def __repr__(self):
+        return f"TrackExternalUrlORM(url='{self.url}', source='{self.source}', id='{self.id}', track='{self.track}', track_id='{self.track_id}', createdAt='{self.createdAt}')"
 
 
 class TrackFeatureORM(Base):
@@ -172,15 +148,15 @@ class TrackFeatureORM(Base):
 
     __tablename__ = "track_feature"
 
-    id: Mapped[str] = mapped_column(primary_key=True, default=uuid.uuid4().__str__())
+    id: Mapped[str] = mapped_column(primary_key=True, default=uuid.uuid4)
     track_id: Mapped[str] = mapped_column(
         ForeignKey("track.id", ondelete="CASCADE", onupdate="CASCADE")
     )
-    track: Mapped["Track"] = relationship(back_populates="featured")
+    track: Mapped["TrackORM"] = relationship(back_populates="featured")
     artist_id: Mapped[str] = mapped_column(
         ForeignKey("artist.id", ondelete="CASCADE", onupdate="CASCADE")
     )
-    artist: Mapped["Artist"] = relationship(back_populates="featured")
+    artist: Mapped["ArtistORM"] = relationship(back_populates="featured")
     createdAt: Mapped[datetime] = mapped_column(server_default=func.now())
 
 
@@ -189,14 +165,14 @@ class TrackRecordORM(Base):
 
     __tablename__ = "track_record"
 
-    id: Mapped[str] = mapped_column(primary_key=True, default=uuid.uuid4().__str__())
+    id: Mapped[str] = mapped_column(primary_key=True, default=uuid.uuid4)
     track_id: Mapped[str] = mapped_column(
         ForeignKey("track.id", ondelete="CASCADE", onupdate="CASCADE")
     )
-    track: Mapped["Track"] = relationship()
+    track: Mapped["TrackORM"] = relationship()
     type: Mapped[Optional[str]]
     createdAt: Mapped[datetime] = mapped_column(server_default=func.now())
-    played_at: Mapped[float]
+    played_at: Mapped[datetime]
 
     def __repr__(self):
         return f"<TrackRecord(id='{self.id}', track_id='{self.track_id}', track='{self.track}', played_at='{self.played_at}', type='{self.type}')>"
@@ -213,4 +189,4 @@ class UserORM(Base):
     country: Mapped[str]
     account_tier: Mapped[str]
     display_name: Mapped[str]
-    id: Mapped[str] = mapped_column(primary_key=True, default=uuid.uuid4().__str__())
+    id: Mapped[str] = mapped_column(primary_key=True, default=uuid.uuid4)
