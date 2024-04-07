@@ -2,7 +2,7 @@
 
 from typing import List, Dict, Optional
 
-from datetime import datetime
+from datetime import datetime, date
 from dataclasses import dataclass
 
 import uuid
@@ -25,7 +25,7 @@ class AlbumORM(Base):
     id: Mapped[str] = mapped_column(primary_key=True)
     href: Mapped[str]
     name: Mapped[str]
-    release_date: Mapped[str]
+    release_date: Mapped[date]
     total_tracks: Mapped[int]
     # artists: Mapped[List["Artist"]] = relationship(back_populates="album")
     external_urls: Mapped[List["AlbumExternalUrlORM"]] = relationship(
@@ -46,11 +46,14 @@ class AlbumImageORM(Base):
     url: Mapped[str]
     width: Mapped[int]
     height: Mapped[int]
-    id: Mapped[str] = mapped_column(primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     album_id: Mapped[str] = mapped_column(
         ForeignKey("album.id", ondelete="CASCADE", onupdate="CASCADE")
     )
     album: Mapped["AlbumORM"] = relationship(back_populates="image")
+
+    def __repr__(self) -> str:
+        return f"AlbumImageORM(url='{self.url}', width='{self.width}', height='{self.height}', id='{self.id}', album_id='{self.album_id}'), album='{self.album}'"
 
 
 class AlbumExternalUrlORM(Base):
