@@ -46,7 +46,9 @@ class AlbumImageORM(Base):
     url: Mapped[str]
     width: Mapped[int]
     height: Mapped[int]
-    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(
+        primary_key=True, default=uuid.uuid4, unique=True
+    )
     album_id: Mapped[str] = mapped_column(
         ForeignKey("album.id", ondelete="CASCADE", onupdate="CASCADE")
     )
