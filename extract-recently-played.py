@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+import uuid
 
 from models.models_orm import (
     AlbumORM,
@@ -20,11 +21,15 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import NoResultFound
 
-filename = "test_file-1rec-albm1img.json"
+filename = "test_file-original.json"
 
 pg_uri = "postgresql://postgres:example@localhost:8032/postgres"
 engine = create_engine(pg_uri, echo=True)
 Session = sessionmaker(bind=engine, autoflush=False)
+
+
+def get_uuid4_str() -> str:
+    return str(uuid.uuid4())
 
 
 def get_or_create(session, model, **kwargs):
@@ -45,16 +50,19 @@ def get_instance(session, model, **kwargs):
 def create_instance(session, model, **kwargs):
     try:
         instance = model(**kwargs)
-        print("*" * 20)
-        print(instance)
-        print("*" * 20)
+        # print("*" * 20)
+        # print(instance)
+        # print("-" * 10)
+        # print(instance.__dict__)
+        # print("*" * 20)
         session.add(instance)
         session.flush()
-        # if "album_id" in kwargs:
-        #     instance.album_id = kwargs["album_id"]
     except Exception as msg:
-        # mtext = 'model:{}, args:{} => msg:{}'
+        mtext = f"model:{model}, args:{kwargs} => msg:{msg}"
         # log.error(mtext.format(model, kwargs, msg))
+        # print("*" * 20)
+        # print(f"EXCEPTION CAUGHT:\n{mtext}")
+        # print("*" * 20)
         session.rollback()
         raise (msg)
     return instance
@@ -163,23 +171,20 @@ with Session() as session:
                 album_external_urls_coll.append(album_external_url_orm)
 
             # Album Image
-            album_images_coll = []
-            for image in album_item.images:
-                image: Image = image
+            # album_images_coll = []
+            # for image in album_item.images:
+            #     image: Image = image
 
-                album_image_orm: AlbumImageORM = get_or_create(
-                    session,
-                    AlbumImageORM,
-                    url=image.url,
-                    width=image.width,
-                    height=image.height,
-                    album_id=album_orm.id,
-                    album=album_orm,
-                )
-                # print("***************\nalbum_image_orm is BELOW:")
-                # print(album_image_orm.album_id)
-                # print("***************\n")
-                # album_images_coll.append(album_image_orm)
+            #     album_image_orm: AlbumImageORM = get_or_create(
+            #         session,
+            #         AlbumImageORM,
+            #         id=get_uuid4_str(),
+            #         url=image.url,
+            #         width=image.width,
+            #         height=image.height,
+            #         album_id=album_orm.id,
+            #         album=album_orm,
+            #     )
 
             track_record: TrackRecordORM = get_or_create(
                 session,

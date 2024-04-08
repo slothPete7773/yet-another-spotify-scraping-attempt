@@ -29,3 +29,10 @@ crontab -e
 # View existsing cron job
 crontab -l
 ```
+
+
+# Issues
+
+1. Problem while inserting Album Images. Iterating through Album images list but the AlbumImage Object is not instantiate for each iteration. Making the previous iteration object entangled with new iteration object. 
+   1. I tried manually provide UUID, the UUIDs are different for each iteration, but when look closely, a new iteration object still hold on to previous UUID. WTF?
+   2. Having concern about the Artists field, because it is a list as well, and might affect by this problem too.

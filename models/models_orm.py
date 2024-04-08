@@ -46,9 +46,7 @@ class AlbumImageORM(Base):
     url: Mapped[str]
     width: Mapped[int]
     height: Mapped[int]
-    id: Mapped[uuid.UUID] = mapped_column(
-        primary_key=True, default=uuid.uuid4, unique=True
-    )
+    id: Mapped[str] = mapped_column(primary_key=True)
     album_id: Mapped[str] = mapped_column(
         ForeignKey("album.id", ondelete="CASCADE", onupdate="CASCADE")
     )
@@ -65,7 +63,7 @@ class AlbumExternalUrlORM(Base):
 
     url: Mapped[str]
     source: Mapped[str]
-    id: Mapped[str] = mapped_column(primary_key=True, default=uuid.uuid4)
+    id: Mapped[str] = mapped_column(primary_key=True, default=lambda: str(uuid.uuid4()))
     album: Mapped["AlbumORM"] = relationship(back_populates="external_urls")
     album_id: Mapped[str] = mapped_column(
         ForeignKey("album.id", ondelete="CASCADE", onupdate="CASCADE")
@@ -95,7 +93,7 @@ class ArtistExternalUrlORM(Base):
 
     url: Mapped[str]
     source: Mapped[str]
-    id: Mapped[str] = mapped_column(primary_key=True, default=uuid.uuid4)
+    id: Mapped[str] = mapped_column(primary_key=True, default=lambda: str(uuid.uuid4()))
     artist: Mapped["ArtistORM"] = relationship(back_populates="external_urls")
     artist_id: Mapped[str] = mapped_column(
         ForeignKey("artist.id", ondelete="CASCADE", onupdate="CASCADE")
@@ -137,7 +135,7 @@ class TrackExternalUrlORM(Base):
 
     url: Mapped[str]
     source: Mapped[str]
-    id: Mapped[str] = mapped_column(primary_key=True, default=uuid.uuid4)
+    id: Mapped[str] = mapped_column(primary_key=True, default=lambda: str(uuid.uuid4()))
     track: Mapped["TrackORM"] = relationship(back_populates="external_urls")
     track_id: Mapped[str] = mapped_column(
         ForeignKey("track.id", ondelete="CASCADE", onupdate="CASCADE")
@@ -153,7 +151,7 @@ class TrackFeatureORM(Base):
 
     __tablename__ = "track_feature"
 
-    id: Mapped[str] = mapped_column(primary_key=True, default=uuid.uuid4)
+    id: Mapped[str] = mapped_column(primary_key=True, default=lambda: str(uuid.uuid4()))
     track_id: Mapped[str] = mapped_column(
         ForeignKey("track.id", ondelete="CASCADE", onupdate="CASCADE")
     )
@@ -170,7 +168,7 @@ class TrackRecordORM(Base):
 
     __tablename__ = "track_record"
 
-    id: Mapped[str] = mapped_column(primary_key=True, default=uuid.uuid4)
+    id: Mapped[str] = mapped_column(primary_key=True, default=lambda: str(uuid.uuid4()))
     track_id: Mapped[str] = mapped_column(
         ForeignKey("track.id", ondelete="CASCADE", onupdate="CASCADE")
     )
@@ -194,4 +192,4 @@ class UserORM(Base):
     country: Mapped[str]
     account_tier: Mapped[str]
     display_name: Mapped[str]
-    id: Mapped[str] = mapped_column(primary_key=True, default=uuid.uuid4)
+    id: Mapped[str] = mapped_column(primary_key=True, default=lambda: str(uuid.uuid4()))
