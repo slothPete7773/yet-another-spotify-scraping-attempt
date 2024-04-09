@@ -50,19 +50,10 @@ def get_instance(session, model, **kwargs):
 def create_instance(session, model, **kwargs):
     try:
         instance = model(**kwargs)
-        # print("*" * 20)
-        # print(instance)
-        # print("-" * 10)
-        # print(instance.__dict__)
-        # print("*" * 20)
         session.add(instance)
         session.flush()
     except Exception as msg:
         mtext = f"model:{model}, args:{kwargs} => msg:{msg}"
-        # log.error(mtext.format(model, kwargs, msg))
-        # print("*" * 20)
-        # print(f"EXCEPTION CAUGHT:\n{mtext}")
-        # print("*" * 20)
         session.rollback()
         raise (msg)
     return instance
@@ -171,20 +162,20 @@ with Session() as session:
                 album_external_urls_coll.append(album_external_url_orm)
 
             # Album Image
-            # album_images_coll = []
-            # for image in album_item.images:
-            #     image: Image = image
+            album_images_coll = []
+            for image in album_item.images:
+                image: Image = image
 
-            #     album_image_orm: AlbumImageORM = get_or_create(
-            #         session,
-            #         AlbumImageORM,
-            #         id=get_uuid4_str(),
-            #         url=image.url,
-            #         width=image.width,
-            #         height=image.height,
-            #         album_id=album_orm.id,
-            #         album=album_orm,
-            #     )
+                album_image_orm: AlbumImageORM = get_or_create(
+                    session,
+                    AlbumImageORM,
+                    id=get_uuid4_str(),
+                    url=image.url,
+                    width=image.width,
+                    height=image.height,
+                    album_id=album_orm.id,
+                    album=album_orm,
+                )
 
             track_record: TrackRecordORM = get_or_create(
                 session,
