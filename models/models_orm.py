@@ -31,7 +31,7 @@ class AlbumORM(Base):
     external_urls: Mapped[List["AlbumExternalUrlORM"]] = relationship(
         back_populates="album"
     )
-    image: Mapped["AlbumImageORM"] = relationship(back_populates="album")
+    images: Mapped[list["AlbumImageORM"]] = relationship(back_populates="album")
     createdAt: Mapped[datetime] = mapped_column(server_default=func.now())
 
     def __init__(self, **data):
@@ -50,7 +50,7 @@ class AlbumImageORM(Base):
     album_id: Mapped[str] = mapped_column(
         ForeignKey("album.id", ondelete="CASCADE", onupdate="CASCADE")
     )
-    album: Mapped["AlbumORM"] = relationship(back_populates="image")
+    album: Mapped["AlbumORM"] = relationship(back_populates="images")
 
     def __repr__(self) -> str:
         return f"AlbumImageORM(url='{self.url}', width='{self.width}', height='{self.height}', id='{self.id}', album_id='{self.album_id}'), album='{self.album}'"
