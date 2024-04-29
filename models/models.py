@@ -63,4 +63,4 @@ class Context(BaseModel):
 class TrackRecord(BaseModel):
     track: Track
     played_at: datetime
-    context: Context
+    context: Context | None = None
