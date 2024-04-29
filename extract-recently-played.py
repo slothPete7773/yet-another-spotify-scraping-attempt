@@ -3,6 +3,10 @@ from datetime import datetime
 import uuid
 import os
 
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm.exc import NoResultFound
+
 from models.models_orm import (
     AlbumORM,
     AlbumImageORM,
@@ -18,14 +22,23 @@ from models.models_orm import (
 )
 from models.models import *
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.orm.exc import NoResultFound
+
+from configparser import ConfigParser
+
+config = ConfigParser()
+config.read("env.conf")
+
 
 filename = "test_file-original.json"
 
-pg_uri = "postgresql://postgres:example@localhost:8032/postgres"
-engine = create_engine(pg_uri, echo=True)
+USERNAME = config.get("postgresql", "username")
+PASSWORD = config.get("postgresql", "password")
+HOST = config.get("postgresql", "host")
+PORT = config.get("postgresql", "port")
+DEFAULT_DATABASE = config.get("postgresql", "default_database")
+pg_uri = f"postgresql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DEFAULT_DATABASE}"
+
+engine = create_engine(pg_uri, echo=False)
 Session = sessionmaker(bind=engine, autoflush=False)
 
 
