@@ -22,6 +22,15 @@ from models.models_orm import (
 )
 from models.models import *
 
+import logging
+from datetime import datetime
+
+logging.basicConfig(
+    filename=f"log/insertion-{datetime.now().strftime('%Y-%m-%d')}.log",
+    filemode="a",
+    level=logging.INFO,
+    format="%(asctime)s - %(message)s",
+)
 
 from configparser import ConfigParser
 

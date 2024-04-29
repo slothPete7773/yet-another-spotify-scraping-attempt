@@ -7,8 +7,16 @@ from configparser import ConfigParser
 config = ConfigParser()
 config.read("env.conf")
 
-db_url = "postgresql://postgres:example@localhost:8032/postgres"
-engine = create_engine(db_url, echo=True)
+import logging
+from datetime import datetime
+
+logging.basicConfig(
+    filename=f"log/create-table-{datetime.now().strftime('%Y-%m-%d')}.log",
+    filemode="a",
+    level=logging.INFO,
+    format="%(asctime)s - %(message)s",
+)
+
 
 USERNAME = config.get("postgresql", "username")
 PASSWORD = config.get("postgresql", "password")
@@ -23,7 +31,10 @@ engine = create_engine(pg_uri, echo=True)
 print(engine)
 print(Base.metadata.tables.values())
 # Base.metadata
-
+logging.info("INITIATE DROP ALL TABLES.")
 Base.metadata.drop_all(engine)
+logging.info("SUCCESSFULLY DROPPED ALL TABLES.")
 
+logging.info("INITIATE CREATE ALL TABLES.")
 Base.metadata.create_all(engine)
+logging.info("SUCCESSFULLY CREATED ALL TABLES.")
