@@ -47,7 +47,7 @@ PORT = config.get("postgresql", "port")
 DEFAULT_DATABASE = config.get("postgresql", "default_database")
 pg_uri = f"postgresql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DEFAULT_DATABASE}"
 
-engine = create_engine(pg_uri, echo=False)
+engine = create_engine(pg_uri, echo=True)
 Session = sessionmaker(bind=engine, autoflush=False)
 
 

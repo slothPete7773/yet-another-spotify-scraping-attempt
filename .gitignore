@@ -10,3 +10,7 @@ env.conf
 /landing/*.json
 
 **/.venv
+/processed/*.json
+
+# Log
+/log/*.log
