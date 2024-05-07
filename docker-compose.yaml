@@ -1,0 +1,21 @@
+services:
+  extract_server:
+    build: .
+    volumes:
+      - ./mount_point/landing:/app/landing
+      - ./mount_point/processed:/app/processed
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /app
+  postgres_db:
+    image: postgres:14-alpine
+    ports:
+      - 5432:5432
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres

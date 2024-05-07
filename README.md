@@ -24,7 +24,9 @@ $ pip3 install -r requirements.txt
 crontab -e 
 
 # Add the following cronjob to Vim console.  <Cron job schedule> <command>
-*/3 * * * * cd ~/Desktop/programming/yet-another-spotify-scraping-attempt/ && ./.venv/bin/python ./get-recently-played.py
+*/50 * * * * cd ~/Desktop/programming/yet-another-spotify-scraping-attempt/ && ./.venv/bin/python ./get-recently-played.py
+
+*/60 * * * * cd ~/Desktop/programming/yet-another-spotify-scraping-attempt/ && ./.venv/bin/python ./extract-recently-played.py
 
 # View existsing cron job
 crontab -l
@@ -33,6 +35,8 @@ crontab -l
 
 # Issues
 
-1. Problem while inserting Album Images. Iterating through Album images list but the AlbumImage Object is not instantiate for each iteration. Making the previous iteration object entangled with new iteration object. 
+1. **[Solved]** Problem while inserting Album Images. Iterating through Album images list but the AlbumImage Object is not instantiate for each iteration. Making the previous iteration object entangled with new iteration object. 
    1. I tried manually provide UUID, the UUIDs are different for each iteration, but when look closely, a new iteration object still hold on to previous UUID. WTF?
    2. Having concern about the Artists field, because it is a list as well, and might affect by this problem too.
+
+2. Track item from Spotify has field `popularity` updated, while the database is not update accordingly. The query to find existing data is wrong, use all fields to find is too strict. 

@@ -18,11 +18,12 @@ logging.basicConfig(
 )
 
 
-USERNAME = config.get("postgresql", "username")
-PASSWORD = config.get("postgresql", "password")
-HOST = config.get("postgresql", "host")
-PORT = config.get("postgresql", "port")
-DEFAULT_DATABASE = config.get("postgresql", "default_database")
+ENV = "postgresql_dev"
+USERNAME = config.get(ENV, "username")
+PASSWORD = config.get(ENV, "password")
+HOST = config.get(ENV, "host")
+PORT = config.get(ENV, "port")
+DEFAULT_DATABASE = config.get(ENV, "default_database")
 pg_uri = f"postgresql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DEFAULT_DATABASE}"
 
 logging.info(f"CONNECTED TO Postgresql WITH HOST: {HOST}.")
