@@ -26,7 +26,7 @@ class Album(BaseModel):
     id: str
     images: list[Image]
     name: str
-    release_date: date
+    release_date: str
     release_date_precision: str
     total_tracks: int
     type: str

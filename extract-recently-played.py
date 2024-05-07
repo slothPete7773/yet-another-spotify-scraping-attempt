@@ -7,20 +7,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import NoResultFound
 
-from models.models_orm import (
-    AlbumORM,
-    AlbumImageORM,
-    AlbumExternalUrlORM,
-    ArtistORM,
-    ArtistExternalUrlORM,
-    TrackORM,
-    TrackExternalUrlORM,
-    TrackFeatureORM,
-    TrackRecordORM,
-    UserORM,
-    # Session,
-)
+from models.models_orm import *
 from models.models import *
+
+from utils.database import Database
 
 import logging
 from datetime import datetime
@@ -50,35 +40,6 @@ engine = create_engine(pg_uri, echo=False)
 Session = sessionmaker(bind=engine, autoflush=False)
 
 
-def get_uuid4_str() -> str:
-    return str(uuid.uuid4())
-
-
-def get_or_create(session, model, **kwargs):
-    def get_instance(session, model, **kwargs):
-        try:
-            return session.query(model).filter_by(**kwargs).first()
-        except NoResultFound:
-            return
-
-    def create_instance(session, model, **kwargs):
-        try:
-            instance = model(**kwargs)
-            session.add(instance)
-            session.flush()
-        except Exception as msg:
-            mtext = f"model:{model}, args:{kwargs} => msg:{msg}"
-            session.rollback()
-            raise (msg)
-        return instance
-
-    instance = get_instance(session, model, **kwargs)
-    if instance is None:
-        instance = create_instance(session, model, **kwargs)
-
-    return instance
-
-
 def get_all_filenames() -> list[str]:
     LANDING_SOURCE_DIR = "landing"
     filenames = os.listdir(LANDING_SOURCE_DIR)
@@ -95,26 +56,16 @@ def move_done_to_processed(src_path, dest_path):
     os.rename(src_path, dest_path)
 
 
-def open_json_file(filepath):
-    try:
-        if os.path.isfile(filepath):
-            with open(filepath) as file:
-                return json.load(file)
-        else:
-            return None
-    except FileNotFoundError as e:
-        print(f"Error: Ensure file is existed.")
-        return e
-
-
 def map_with_pydantic(wrapper, objects):
     return [wrapper(**item) for item in objects]
 
 
 with Session() as session:
+    open_json_file = Database.open_json_file
+    get_or_create = Database.get_or_create
+    get_uuid4_str = Database.get_uuid4_str
     filepaths = get_all_filenames()
     for filepath in filepaths:
-        print(f"Processing file: {filepath}")
         file_content = open_json_file(filepath)
         recorded_activities: list = file_content["items"]
 
@@ -130,6 +81,7 @@ with Session() as session:
                 href=album_item.href,
                 name=album_item.name,
                 release_date=album_item.release_date,
+                release_date_precision=album_item.release_date_precision,
                 total_tracks=album_item.total_tracks,
             )
 
@@ -149,7 +101,6 @@ with Session() as session:
                 explicit=track_item.explicit,
                 album_id=track_item.album.id,
             )
-
             # Artist
             track_artist_items = track_item.artists
             artists_coll = []

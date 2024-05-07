@@ -25,7 +25,8 @@ class AlbumORM(Base):
     id: Mapped[str] = mapped_column(primary_key=True)
     href: Mapped[str]
     name: Mapped[str]
-    release_date: Mapped[date]
+    release_date: Mapped[str]
+    release_date_precision: Mapped[str]
     total_tracks: Mapped[int]
     # artists: Mapped[List["Artist"]] = relationship(back_populates="album")
     external_urls: Mapped[List["AlbumExternalUrlORM"]] = relationship(
@@ -33,6 +34,7 @@ class AlbumORM(Base):
     )
     images: Mapped[list["AlbumImageORM"]] = relationship(back_populates="album")
     createdAt: Mapped[datetime] = mapped_column(server_default=func.now())
+    updatedAt: Mapped[datetime] = mapped_column(server_default=func.now())
 
     def __init__(self, **data):
         super().__init__(**data)
@@ -51,6 +53,8 @@ class AlbumImageORM(Base):
         ForeignKey("album.id", ondelete="CASCADE", onupdate="CASCADE")
     )
     album: Mapped["AlbumORM"] = relationship(back_populates="images")
+    createdAt: Mapped[datetime] = mapped_column(server_default=func.now())
+    updatedAt: Mapped[datetime] = mapped_column(server_default=func.now())
 
     def __repr__(self) -> str:
         return f"AlbumImageORM(url='{self.url}', width='{self.width}', height='{self.height}', id='{self.id}', album_id='{self.album_id}'), album='{self.album}'"
@@ -69,6 +73,7 @@ class AlbumExternalUrlORM(Base):
         ForeignKey("album.id", ondelete="CASCADE", onupdate="CASCADE")
     )
     createdAt: Mapped[datetime] = mapped_column(server_default=func.now())
+    updatedAt: Mapped[datetime] = mapped_column(server_default=func.now())
 
 
 class ArtistORM(Base):
@@ -84,6 +89,7 @@ class ArtistORM(Base):
     )
     featured: Mapped[List["TrackFeatureORM"]] = relationship(back_populates="artist")
     createdAt: Mapped[datetime] = mapped_column(server_default=func.now())
+    updatedAt: Mapped[datetime] = mapped_column(server_default=func.now())
 
 
 class ArtistExternalUrlORM(Base):
@@ -99,6 +105,7 @@ class ArtistExternalUrlORM(Base):
         ForeignKey("artist.id", ondelete="CASCADE", onupdate="CASCADE")
     )
     createdAt: Mapped[datetime] = mapped_column(server_default=func.now())
+    updatedAt: Mapped[datetime] = mapped_column(server_default=func.now())
 
 
 class TrackORM(Base):
@@ -123,9 +130,22 @@ class TrackORM(Base):
     )
     featured: Mapped[List["TrackFeatureORM"]] = relationship(back_populates="track")
     createdAt: Mapped[datetime] = mapped_column(server_default=func.now())
+    updatedAt: Mapped[datetime] = mapped_column(server_default=func.now())
 
     def __repr__(self):
-        return f"<Track(id='{self.id}', name='{self.name}')>"
+        return f"""
+        <Track(href='{self.href}',
+            href='{self.href},
+            name='{self.name}',
+            popularity='{self.popularity}',
+            preview_url='{self.preview_url}',
+            disc_number='{self.disc_number}',
+            duration_ms='{self.duration_ms}',
+            track_number='{self.track_number}',
+            id='{self.id}',
+            explicit='{self.explicit}',
+            album_id='{self.album_id}',
+            ')>"""
 
 
 class TrackExternalUrlORM(Base):
@@ -141,6 +161,7 @@ class TrackExternalUrlORM(Base):
         ForeignKey("track.id", ondelete="CASCADE", onupdate="CASCADE")
     )
     createdAt: Mapped[datetime] = mapped_column(server_default=func.now())
+    updatedAt: Mapped[datetime] = mapped_column(server_default=func.now())
 
     def __repr__(self):
         return f"TrackExternalUrlORM(url='{self.url}', source='{self.source}', id='{self.id}', track='{self.track}', track_id='{self.track_id}', createdAt='{self.createdAt}')"
@@ -161,6 +182,7 @@ class TrackFeatureORM(Base):
     )
     artist: Mapped["ArtistORM"] = relationship(back_populates="featured")
     createdAt: Mapped[datetime] = mapped_column(server_default=func.now())
+    updatedAt: Mapped[datetime] = mapped_column(server_default=func.now())
 
 
 class TrackRecordORM(Base):
@@ -175,6 +197,7 @@ class TrackRecordORM(Base):
     track: Mapped["TrackORM"] = relationship()
     type: Mapped[Optional[str]]
     createdAt: Mapped[datetime] = mapped_column(server_default=func.now())
+    updatedAt: Mapped[datetime] = mapped_column(server_default=func.now())
     played_at: Mapped[datetime]
 
     def __repr__(self):
