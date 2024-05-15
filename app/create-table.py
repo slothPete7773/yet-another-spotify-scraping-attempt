@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 
-from models.models_orm import Base
+from app.models.schema.models_orm import Base
 
 from configparser import ConfigParser
 

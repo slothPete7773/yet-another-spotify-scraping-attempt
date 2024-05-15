@@ -7,8 +7,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import NoResultFound
 
-from models.models_orm import *
-from models.models import *
+from app.models.schema.models_orm import *
+from app.models.domain.models import *
 
 from utils.database import Database
 
